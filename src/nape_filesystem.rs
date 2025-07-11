@@ -206,7 +206,7 @@ pub fn remove_subpath(subpath: &str) {
 #[macro_export]
 macro_rules! generate_nape_testing {
     () => {{
-        nape_filesystem::nape_testing_dir_as_string()
+        attestify_test_framework::nape_filesystem::nape_testing_dir_as_string()
     }};
 }
 
@@ -214,7 +214,7 @@ macro_rules! generate_nape_testing {
 #[macro_export]
 macro_rules! remove_nape_testing {
     () => {{
-        nape_filesystem::remove_nape_testing_dir()
+        attestify_test_framework::nape_filesystem::remove_nape_testing_dir()
     }};
 }
 
@@ -227,7 +227,7 @@ macro_rules! remove_nape_testing {
 #[macro_export]
 macro_rules! path_for {
     ($subpath:expr) => {{
-        nape_filesystem::generate_path_for($subpath)
+        attestify_test_framework::nape_filesystem::generate_path_for($subpath)
     }};
 }
 
@@ -235,7 +235,7 @@ macro_rules! path_for {
 #[macro_export]
 macro_rules! create {
     ($subpath:expr) => {{
-        nape_filesystem::create_subpath($subpath)
+        attestify_test_framework::nape_filesystem::create_subpath($subpath)
     }};
 }
 
@@ -253,14 +253,16 @@ macro_rules! create {
 ///  The path to the file as a [`PathBuf`].
 ///
 /// # Example
-/// ```ignore
+/// ```no_run
+/// use attestify_test_framework::create_file;
+///
 /// let local_file = create_file!("some_directory/file_to_create.yaml", "The text you want in the file.");
 /// ```
 ///
 #[macro_export]
 macro_rules! create_file {
     ($subpath:expr, $contents:expr) => {{
-        nape_filesystem::generate_nape_testing_file($subpath, $contents)
+        attestify_test_framework::nape_filesystem::generate_nape_testing_file($subpath, $contents)
     }};
     () => {};
 }
@@ -280,14 +282,17 @@ macro_rules! create_file {
 ///
 /// # Example
 ///
-///```ignore
+///```no_run
+///
+/// use attestify_test_framework::create_write_only_file;
+///
 /// let local_file = create_write_only_file!("some_directory/file_to_create.yaml", "The text you want in the file.");
 ///```
 ///
 #[macro_export]
 macro_rules! create_write_only_file {
     ($subpath:expr, $contents:expr) => {{
-        nape_filesystem::generate_nape_testing_file_write_only($subpath, $contents)
+        attestify_test_framework::nape_filesystem::generate_nape_testing_file_write_only($subpath, $contents)
     }};
     () => {};
 }
@@ -296,7 +301,7 @@ macro_rules! create_write_only_file {
 #[macro_export]
 macro_rules! remove {
     ($subpath:expr) => {{
-        nape_filesystem::remove_subpath($subpath)
+        attestify_test_framework::nape_filesystem::remove_subpath($subpath)
     }};
 }
 
