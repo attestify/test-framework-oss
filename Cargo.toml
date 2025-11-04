@@ -2,7 +2,11 @@
 
 [package]
 name = "attestify_test_framework"
-version = "0.1.0"
+version = "0.2.0"
 edition = "2024"
 
-[dependencies]
+[features]
+# keep assertions available by default, nape_filesystem opt-in
+default = ["assertions"]
+assertions = []
+nape_filesystem = []
