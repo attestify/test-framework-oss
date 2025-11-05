@@ -1,8 +1,8 @@
 # Attestify Test Framework - Open Source
 
 [package]
-name = "attestify_test_framework"
-version = "0.2.0"
+name = "test_framework_oss"
+version = "0.2.1"
 edition = "2024"
 
 [features]
