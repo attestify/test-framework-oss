@@ -206,7 +206,7 @@ pub fn remove_subpath(subpath: &str) {
 #[macro_export]
 macro_rules! generate_nape_testing {
     () => {{
-        attestify_test_framework::nape_filesystem::nape_testing_dir_as_string()
+        test_framework_oss::nape_filesystem::nape_testing_dir_as_string()
     }};
 }
 
@@ -214,7 +214,7 @@ macro_rules! generate_nape_testing {
 #[macro_export]
 macro_rules! remove_nape_testing {
     () => {{
-        attestify_test_framework::nape_filesystem::remove_nape_testing_dir()
+        test_framework_oss::nape_filesystem::remove_nape_testing_dir()
     }};
 }
 
@@ -227,7 +227,7 @@ macro_rules! remove_nape_testing {
 #[macro_export]
 macro_rules! path_for {
     ($subpath:expr) => {{
-        attestify_test_framework::nape_filesystem::generate_path_for($subpath)
+        test_framework_oss::nape_filesystem::generate_path_for($subpath)
     }};
 }
 
@@ -235,7 +235,7 @@ macro_rules! path_for {
 #[macro_export]
 macro_rules! create {
     ($subpath:expr) => {{
-        attestify_test_framework::nape_filesystem::create_subpath($subpath)
+        test_framework_oss::nape_filesystem::create_subpath($subpath)
     }};
 }
 
@@ -254,7 +254,7 @@ macro_rules! create {
 ///
 /// # Example
 /// ```no_run
-/// use attestify_test_framework::create_file;
+/// use test_framework_oss::create_file;
 ///
 /// let local_file = create_file!("some_directory/file_to_create.yaml", "The text you want in the file.");
 /// ```
@@ -262,7 +262,7 @@ macro_rules! create {
 #[macro_export]
 macro_rules! create_file {
     ($subpath:expr, $contents:expr) => {{
-        attestify_test_framework::nape_filesystem::generate_nape_testing_file($subpath, $contents)
+        test_framework_oss::nape_filesystem::generate_nape_testing_file($subpath, $contents)
     }};
     () => {};
 }
@@ -284,7 +284,7 @@ macro_rules! create_file {
 ///
 ///```no_run
 ///
-/// use attestify_test_framework::create_write_only_file;
+/// use test_framework_oss::create_write_only_file;
 ///
 /// let local_file = create_write_only_file!("some_directory/file_to_create.yaml", "The text you want in the file.");
 ///```
@@ -292,7 +292,7 @@ macro_rules! create_file {
 #[macro_export]
 macro_rules! create_write_only_file {
     ($subpath:expr, $contents:expr) => {{
-        attestify_test_framework::nape_filesystem::generate_nape_testing_file_write_only($subpath, $contents)
+        test_framework_oss::nape_filesystem::generate_nape_testing_file_write_only($subpath, $contents)
     }};
     () => {};
 }
@@ -301,7 +301,7 @@ macro_rules! create_write_only_file {
 #[macro_export]
 macro_rules! remove {
     ($subpath:expr) => {{
-        attestify_test_framework::nape_filesystem::remove_subpath($subpath)
+        test_framework_oss::nape_filesystem::remove_subpath($subpath)
     }};
 }
 
