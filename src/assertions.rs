@@ -87,9 +87,7 @@ macro_rules! kernel_error_has_message {
                     )
                 );
                 if e.message.len() == 0 {
-                    panic!(
-                        "The error message is empty.  A populated error message is expected.\n"
-                    );
+                    panic!("The error message is empty.  A populated error message is expected.\n");
                 }
             }
         }
