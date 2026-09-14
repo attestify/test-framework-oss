@@ -9,7 +9,7 @@
 ///
 #[macro_export]
 macro_rules! kernel_error_eq {
-    ($result:expr, $expected_kind:expr, $expected_audience:expr, $expected_message:expr) => {
+    ($result:expr, $expected_kind:expr, $expected_audience:expr, $expected_message:expr $(,)?) => {
         match $result {
             Ok(val) => panic!(
                 "An Error was expected, although one was not returned:\n\t{:?}",

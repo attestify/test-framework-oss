@@ -247,3 +247,205 @@ fn public_abi_accessor_compatibility_success() {
     kernel_error_provenance_eq!(&attached, definitions.current(), None);
     kernel_error_provenance_eq!(&derived, definitions.derived(), Some(definitions.current()),);
 }
+
+/// Requirement validation: No requirement validation point is currently supplied.
+///
+/// Public seam: `Error::try_with_attached_provenance`, `kernel_error_eq!`, and
+/// `kernel_error_has_no_provenance!` / `kernel_error_provenance_eq!`.
+/// Logical path: S2A-T11 a successful attach reconstructs rather than mutates.
+/// Observable result: the returned Error has current provenance while the
+/// retained source has the same exact outer Error contract and no provenance.
+/// Excluded behavior: no raw descriptor literal or private Kernel API is used.
+#[test]
+fn successful_attach_preserves_source_error_success() {
+    let definitions = definitions();
+    let source = outer_error();
+    let attach_result = source.try_with_attached_provenance(definitions.current().clone());
+    let attached = match &attach_result {
+        Ok(error) => error.clone(),
+        Err(_) => panic!("attached Error was expected"),
+    };
+    let source_result: Result<(), Error> = Err(source.clone());
+    let attached_result: Result<(), Error> = Err(attached);
+
+    kernel_error_eq!(
+        &source_result,
+        Kind::GatewayError,
+        Audience::System,
+        OUTER_MESSAGE,
+    );
+    kernel_error_has_no_provenance!(&source_result);
+    kernel_error_eq!(
+        &attached_result,
+        Kind::GatewayError,
+        Audience::System,
+        OUTER_MESSAGE,
+    );
+    kernel_error_provenance_eq!(&attached_result, definitions.current(), None);
+}
+
+/// Requirement validation: No requirement validation point is currently supplied.
+///
+/// Public seam: `Error::try_with_derived_provenance` and the public Error
+/// assertion macros.
+/// Logical path: S2A-T12 a successful derive reconstructs rather than mutates.
+/// Observable result: the returned Error has current plus origin provenance,
+/// while the retained attached source retains current provenance and no origin.
+/// Excluded behavior: no Error text or Debug value determines provenance.
+#[test]
+fn successful_derive_preserves_source_error_success() {
+    let definitions = definitions();
+    let attach_result = outer_error().try_with_attached_provenance(definitions.current().clone());
+    let source = match &attach_result {
+        Ok(error) => error.clone(),
+        Err(_) => panic!("attached Error was expected"),
+    };
+    let derive_result = source.try_with_derived_provenance(definitions.derived().clone());
+    let derived = match &derive_result {
+        Ok(error) => error.clone(),
+        Err(_) => panic!("derived Error was expected"),
+    };
+    let source_result: Result<(), Error> = Err(source.clone());
+    let derived_result: Result<(), Error> = Err(derived);
+
+    kernel_error_eq!(
+        &source_result,
+        Kind::GatewayError,
+        Audience::System,
+        OUTER_MESSAGE,
+    );
+    kernel_error_provenance_eq!(&source_result, definitions.current(), None);
+    kernel_error_eq!(
+        &derived_result,
+        Kind::GatewayError,
+        Audience::System,
+        OUTER_MESSAGE,
+    );
+    kernel_error_provenance_eq!(
+        &derived_result,
+        definitions.derived(),
+        Some(definitions.current()),
+    );
+}
+
+/// Requirement validation: No requirement validation point is currently supplied.
+///
+/// Public seam: `Error::try_with_attached_provenance` and the public Error
+/// assertion macros.
+/// Logical path: S2A-T13 a second attach is rejected without mutating source.
+/// Observable result: the exact Kernel transition Error is returned and the
+/// retained source remains current-only.
+/// Excluded behavior: no Error message is parsed to identify provenance.
+#[test]
+fn rejected_second_attach_preserves_source_error_error() {
+    let definitions = definitions();
+    let attach_result = outer_error().try_with_attached_provenance(definitions.current().clone());
+    let source = match &attach_result {
+        Ok(error) => error.clone(),
+        Err(_) => panic!("attached Error was expected"),
+    };
+    let rejected_result = source.try_with_attached_provenance(definitions.unexpected().clone());
+    let transition_result: Result<(), Error> = match rejected_result {
+        Ok(_) => panic!("second attach rejection was expected"),
+        Err(error) => Err(error),
+    };
+    let source_result: Result<(), Error> = Err(source.clone());
+
+    kernel_error_eq!(
+        &transition_result,
+        Kind::ProcessingFailure,
+        Audience::System,
+        "Error provenance cannot be attached because it is already present.",
+    );
+    kernel_error_has_no_provenance!(&transition_result);
+    kernel_error_eq!(
+        &source_result,
+        Kind::GatewayError,
+        Audience::System,
+        OUTER_MESSAGE,
+    );
+    kernel_error_provenance_eq!(&source_result, definitions.current(), None);
+}
+
+/// Requirement validation: No requirement validation point is currently supplied.
+///
+/// Public seam: `Error::try_with_derived_provenance` and the public Error
+/// assertion macros.
+/// Logical path: S2A-T14 derivation without provenance is rejected unchanged.
+/// Observable result: the exact Kernel transition Error is returned and the
+/// retained source keeps the same exact outer contract with no provenance.
+/// Excluded behavior: no private Error state is inspected.
+#[test]
+fn rejected_absent_derive_preserves_source_error_error() {
+    let definitions = definitions();
+    let source = outer_error();
+    let rejected_result = source.try_with_derived_provenance(definitions.derived().clone());
+    let transition_result: Result<(), Error> = match rejected_result {
+        Ok(_) => panic!("absent provenance derivation rejection was expected"),
+        Err(error) => Err(error),
+    };
+    let source_result: Result<(), Error> = Err(source.clone());
+
+    kernel_error_eq!(
+        &transition_result,
+        Kind::ProcessingFailure,
+        Audience::System,
+        "Error provenance cannot be derived because it is absent.",
+    );
+    kernel_error_has_no_provenance!(&transition_result);
+    kernel_error_eq!(
+        &source_result,
+        Kind::GatewayError,
+        Audience::System,
+        OUTER_MESSAGE,
+    );
+    kernel_error_has_no_provenance!(&source_result);
+}
+
+/// Requirement validation: No requirement validation point is currently supplied.
+///
+/// Public seam: `Error::try_with_derived_provenance` and the public Error
+/// assertion macros.
+/// Logical path: S2A-T15 a second derive is rejected without mutating source.
+/// Observable result: the exact Kernel transition Error is returned and the
+/// retained source preserves its complete current-plus-origin provenance.
+/// Excluded behavior: no raw descriptor comparison or message parsing occurs.
+#[test]
+fn rejected_second_derive_preserves_source_error_error() {
+    let definitions = definitions();
+    let attach_result = outer_error().try_with_attached_provenance(definitions.current().clone());
+    let attached = match &attach_result {
+        Ok(error) => error.clone(),
+        Err(_) => panic!("attached Error was expected"),
+    };
+    let derive_result = attached.try_with_derived_provenance(definitions.derived().clone());
+    let source = match &derive_result {
+        Ok(error) => error.clone(),
+        Err(_) => panic!("derived Error was expected"),
+    };
+    let rejected_result = source.try_with_derived_provenance(definitions.unexpected().clone());
+    let transition_result: Result<(), Error> = match rejected_result {
+        Ok(_) => panic!("second derivation rejection was expected"),
+        Err(error) => Err(error),
+    };
+    let source_result: Result<(), Error> = Err(source.clone());
+
+    kernel_error_eq!(
+        &transition_result,
+        Kind::ProcessingFailure,
+        Audience::System,
+        "Error provenance cannot be derived because an origin is already present.",
+    );
+    kernel_error_has_no_provenance!(&transition_result);
+    kernel_error_eq!(
+        &source_result,
+        Kind::GatewayError,
+        Audience::System,
+        OUTER_MESSAGE,
+    );
+    kernel_error_provenance_eq!(
+        &source_result,
+        definitions.derived(),
+        Some(definitions.current()),
+    );
+}
